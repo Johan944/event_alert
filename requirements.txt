@@ -1,0 +1,7 @@
+docopt
+flask
+flask-talisman
+requests
+pytz
+gunicorn
+BeautifulSoup4

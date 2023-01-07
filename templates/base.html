@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!--Import Google Icon Font-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!--Import materialize.css-->
+    <link href="{{ url_for('static', filename='css/materialize.min.css') }}" rel="stylesheet" media="screen">
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
+    <!--<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">-->
+    {% block title %}
+    <title>Shotgun Alert</title>
+    {% endblock %}
+  </head>
+  <body>
+    {% for message in get_flashed_messages() %}
+    <div class="alert alert-warning">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        {{ message }}
+    </div>
+    {% endfor %}
+    <div class="container">
+      {% block content %}
+      {% endblock %}
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+    function get_bold_text(text) {
+      var element = document.createElement("b");
+      element.innerHTML = text;
+      return element;
+    }
+
+      function update_event(url) {
+        var request_ = new XMLHttpRequest();
+        request_.open("GET", "/update_event?" + "url=" + url);
+        request_.send();
+        div_offers = document.getElementById("offers");
+        event_name = document.getElementById("event_name");
+        event_location = document.getElementById("event_location");
+        event_date = document.getElementById("event_date");
+        event_url = document.getElementById("event_url");
+        event_link = document.getElementById("event_link");
+        prices = document.getElementById("prices");
+
+        event_name.innerHTML = ""
+        event_location.innerHTML = ""
+        event_date.innerHTML = ""
+        event_url.innerHTML = ""
+        event_link.href = "#"
+        
+        request_.onreadystatechange = function () {
+          if (request_.readyState == 4 && request_.status == 200) {
+            var response = request_.responseText;
+            var obj = JSON.parse(response);
+
+            event_name.innerHTML = obj["name"]
+            event_location.innerHTML = obj["location"]["name"] + " : " + obj["location"]["address"]["streetAddress"]
+            event_date.innerHTML = obj["start"] + " - " + obj["end"]
+            event_url.innerHTML = url
+            event_link.href = url
+            
+            div_offers.innerHTML = '';
+            
+            table = document.createElement('table');
+            row = table.insertRow();
+            cell = row.insertCell();
+            cell.style.textAlign = "center";
+            cell.appendChild(get_bold_text("Prix"));
+            cell = row.insertCell();
+            cell.style.textAlign = "center";
+            cell.appendChild(get_bold_text("Disponibilité"));
+            var sold_out_prices = ""
+            for (var offer in obj["offers"]) {
+              var offer = obj["offers"][offer]
+              row = table.insertRow();
+              cell = row.insertCell();
+              cell.style.textAlign = "center";
+              cell.appendChild(document.createTextNode(offer["price"]));
+
+              var available = true;
+              var available_txt = "En Stock"
+              if (offer["availability"].includes("SoldOut")) {
+                available = false;
+                available_txt = "Sold Out"
+                sold_out_prices += String(offer["price"]) + ",";
+              }
+
+              cell = row.insertCell();
+              cell.style.textAlign = "center";
+              cell.appendChild(document.createTextNode(available_txt));
+            }
+          div_offers.appendChild(table);
+          
+;          prices.value = sold_out_prices;
+          }
+        }
+      }      
+    </script>
+  </body>
+</html>
