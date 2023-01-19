@@ -8,22 +8,30 @@ try:
 except ImportError:
     from bs4 import BeautifulSoup
 
+class ParserError(Exception):
+    pass
+
+class BadUrlError(Exception):
+    pass
+
 class Parser:
     def __init__(self):
         pass
 
     def get_offers(self):
         pass
-
 class ParserShotgun(Parser):
     def __init__(self):
         super().__init__()
 
-        self._keys_mapping = {"offers": "offers", "startDate": "start", "endDate": "end", "organizer": "organizer", "location": "location"}
+        self._keys_mapping = {"offers": "offers", "startDate": "utc_start", "endDate": "utc_end", "organizer": "organizer", "location": "location"}
 
 
     def get_infos(self, url):
-        fp = requests.get(url)
+        try:
+            fp = requests.get(url)
+        except:
+            raise BadUrlError()
     
         html = fp.text
         parsed_html = BeautifulSoup(html, features="html.parser")
@@ -33,7 +41,7 @@ class ParserShotgun(Parser):
         else:
             name = None
 
-        infos = {"name": name}
+        infos = {"name": name, "utc_start": None, "utc_end": None}
         for python_key in self._keys_mapping.values():
             infos[python_key] = None
 
@@ -45,8 +53,9 @@ class ParserShotgun(Parser):
                     if html_key in json_content:
                         infos[python_key] = json_content[html_key]
 
-        infos["start"] = self._convert_date(infos["start"], infos["location"]["address"]["addressCountry"])
-        infos["end"] = self._convert_date(infos["end"], infos["location"]["address"]["addressCountry"])
+        if infos["utc_start"] and infos["utc_end"]:
+            infos["start"] = self._convert_date(infos["utc_start"], infos["location"]["address"]["addressCountry"])
+            infos["end"] = self._convert_date(infos["utc_end"], infos["location"]["address"]["addressCountry"])
 
         return infos
 

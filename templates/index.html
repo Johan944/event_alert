@@ -10,7 +10,7 @@
   <form class="col s12" name="event_form" action="/save_form" method="post">
     <div class="row">
       <div class="input-field col s6">
-        <input id="url" name="url" type="text" class="validate" onchange="update_event(this.value)">
+        <input id="url" name="url" type="text" onchange="update_event(this.value)" required>
         <label for="url">Lien de l'évènement</label>
       </div>
     </div>
@@ -26,7 +26,7 @@
     <div id="mail">
       <div class="row">
         <div class="input-field col s6">
-          <input id="input_mail" name="mail" type="text" class="validate">
+          <input id="input_mail" name="mail" type="email" class="validate" required>
           <label for="input_mail">Ton adresse mail</label>
         </div>
       </div>
@@ -41,6 +41,7 @@
     </div>
 
     <input type="hidden" id="prices" name="prices" value="">
+    <input type="hidden" id="event_date_input" name="event_date_input" value="">
   </form>
   {% endblock %}
 </body>

@@ -57,22 +57,32 @@
         event_link = document.getElementById("event_link");
         prices = document.getElementById("prices");
 
+        event_date_input = document.getElementById("event_date_input");
+
+        
+        div_offers.innerHTML = ""
         event_name.innerHTML = ""
         event_location.innerHTML = ""
         event_date.innerHTML = ""
         event_url.innerHTML = ""
         event_link.href = "#"
+        event_date_input.value = ""
         
         request_.onreadystatechange = function () {
           if (request_.readyState == 4 && request_.status == 200) {
             var response = request_.responseText;
             var obj = JSON.parse(response);
 
-            event_name.innerHTML = obj["name"]
-            event_location.innerHTML = obj["location"]["name"] + " : " + obj["location"]["address"]["streetAddress"]
-            event_date.innerHTML = obj["start"] + " - " + obj["end"]
-            event_url.innerHTML = url
-            event_link.href = url
+            if (obj["error"] == true) {
+              return
+            }
+
+            event_name.innerHTML = obj["name"];
+            event_location.innerHTML = obj["location"]["name"] + " : " + obj["location"]["address"]["streetAddress"];
+            event_date.innerHTML = obj["start"] + " - " + obj["end"];
+            event_url.innerHTML = url;
+            event_link.href = url;
+            event_date_input.value = obj["utc_start"];
             
             div_offers.innerHTML = '';
             
